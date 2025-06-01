@@ -127,7 +127,7 @@ For issues, share:
 ## License
 
 (c) Kaiko 2025 ...
-Do what you want with that script. It was mostly enterily generated from Grok using my newly discovered "Promp Eng" skills.
+Do what you want with that script. It was mostly entirely generated from Grok using my newly discovered "Promp Eng" skills.
 I'd prefer to have PR than just bug reports or suggestions of course ;)
 It fits my needs, it could fit yours directly or with a few modifications
 
