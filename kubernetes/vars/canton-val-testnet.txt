@@ -2,6 +2,7 @@ host: postgres=host: postgres.canton-val-testnet.svc.cluster.local.
 host: participant-pg=host: postgres.canton-val-testnet.svc.cluster.local.
 volumeSize: 50Gi=volumeSize: 10Gi  # 10 for devnet/testnet & 100 for mainnet ? (default is 2800Gb for SV)
 participant-pg-secret=postgres-secrets
+# migrating: true=migrating: false
 
 https://OIDC_AUTHORITY_URL/.well-known/jwks.json=DONT REPLACE IF USING AUTH0 BUT COULD BE DIFFERENT (OKTA for EX)
 
@@ -23,7 +24,7 @@ OIDC_AUTHORITY_LEDGER_API_SCOPE=
 OIDC_AUTHORITY_URL=
 OIDC_AUTHORITY_VALIDATOR_AUDIENCE=https://validator.SAME_AS_INGRESS_EXTERNAL_DOMAIN
   - "OPERATOR_WALLET_USER_ID"=
-validatorWalletUsers:=validatorWalletUsers: ['"sub1"','"sub2"','"sub3"'] # OIDC subs could be emails (Okta), that's why I double quote
+validatorWalletUsers:=validatorWalletUsers: ['"sub1"', '"sub2"', '"sub3"'] # OIDC subs could be emails (Okta), that's why I double quote
 
 ONBOARDING_SECRET=
 POSTGRES_PASSWORD=
