@@ -150,5 +150,3 @@ Part of that script could go away/be simplified if a few things were changed in 
 For the second one, a file containing amuletName, amuletNameAcronym, ... or simply adding fake place-holders like other variables (AMULET_NAME_ACRONYM, ...)
 
 For the third one, 2 files, one containing devnet/testnet values or simply adding fake place-holders like other variables (SV_NODE_ID, SV_PUBLIC_KEY, ...)
-
-At least 1 thing it doesn't handle yet : list/multi-values like wallet_admin_oidc_subs
