@@ -1,0 +1,41 @@
+host: postgres=host: postgres.canton-val-testnet.svc.cluster.local.
+host: participant-pg=host: postgres.canton-val-testnet.svc.cluster.local.
+volumeSize: 50Gi=volumeSize: 10Gi  # 10 for devnet/testnet & 100 for mainnet ? (default is 2800Gb for SV)
+participant-pg-secret=postgres-secrets
+
+https://OIDC_AUTHORITY_URL/.well-known/jwks.json=DONT REPLACE IF USING AUTH0 BUT COULD BE DIFFERENT (OKTA for EX)
+
+CHART_VERSION=0.3.21
+TEMPLATE_VERSION=1.0.3
+
+MIGRATION_ID=3
+SPONSOR_SV_URL=https://sv.sv-2.test.global.canton.network.digitalasset.com
+TRUSTED_SCAN_URL=https://scan.sv-2.test.global.canton.network.digitalasset.com
+YOUR_VALIDATOR_NODE_NAME=COMPANYNAME-testnet-1
+YOUR_VALIDATOR_PARTY_HINT=COMPANYNAME-testnet-1
+
+ENVIRONMENT=THE_VAR_YOU_USE_TO_DIFFERENTIATE_K8S_CLUSTERS
+NAMESPACE=canton-val-testnet
+NETWORK=testnet
+
+OIDC_AUTHORITY_LEDGER_API_AUDIENCE=https://validator.SAME_AS_INGRESS_EXTERNAL_DOMAIN
+OIDC_AUTHORITY_LEDGER_API_SCOPE=
+OIDC_AUTHORITY_URL=
+OIDC_AUTHORITY_VALIDATOR_AUDIENCE=https://validator.SAME_AS_INGRESS_EXTERNAL_DOMAIN
+  - "OPERATOR_WALLET_USER_ID"=
+validatorWalletUsers:=validatorWalletUsers: ['"sub1"','"sub2"','"sub3"'] # OIDC subs could be emails (Okta), that's why I double quote
+
+ONBOARDING_SECRET=
+POSTGRES_PASSWORD=
+LEDGER_API_USER=SAME_AS_VALIDATOR_CLIENT_ID@clients if using Auth0, SAME_AS_VALIDATOR_CLIENT_ID otherwise
+VALIDATOR_CLIENT_ID=
+VALIDATOR_CLIENT_SECRET=
+CNS_UI_CLIENT_ID=
+WALLET_UI_CLIENT_ID=
+
+YOUR_CONTACT_POINT=support@COMPANY_DOMAIN
+
+INGRESS_TYPE=nginx
+INGRESS_INTERNAL_SUBDOMAIN=.eu
+INGRESS_INTERNAL_DOMAIN=k8s.internal.COMPANY_DOMAIN
+INGRESS_EXTERNAL_DOMAIN=COMPANY_DOMAIN
