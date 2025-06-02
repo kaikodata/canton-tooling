@@ -1,0 +1,18 @@
+---
+apiVersion: v2
+name: validator
+description: Canton Network Super Validator - NETWORK - validator
+type: application
+version: 1.0.0
+
+dependencies:
+  - name: splice-validator
+    version: "CHART_VERSION"
+    repository: "oci://ghcr.io/digital-asset/decentralized-canton-sync/helm"
+    alias: validator
+  - name: canton-validator-template
+    version: "TEMPLATE_VERSION"
+    repository: "file://../../templates/canton-validator-template"
+    alias: template
+
+# helm install validator oci://ghcr.io/digital-asset/decentralized-canton-sync/helm/splice-validator -n sv --version ${CHART_VERSION} -f splice-node/examples/sv-helm/validator-values.yaml -f splice-node/examples/sv-helm/sv-validator-values.yaml -f ${UI_CONFIG_VALUES_FILE} --wait

@@ -1,0 +1,53 @@
+---
+validator:
+  resources:
+    limits:
+      cpu: 3
+      memory: 12Gi
+    requests:
+      cpu: 500m
+      memory: 8Gi
+
+template:
+  namespace: canton-val-NETWORK
+  environment: ENVIRONMENT
+  imageTag: CHART_VERSION
+
+  service:
+    type: ClusterIP
+    ports:
+      - fqdn: wallet.validator.NETWORKINGRESS_INTERNAL_SUBDOMAIN.INGRESS_INTERNAL_DOMAIN
+        alias: wallet.validator.NETWORK.INGRESS_EXTERNAL_DOMAIN
+        name: http
+        protocol: HTTP
+        paths:
+          - path: /
+            pathType: Prefix
+            serviceName: wallet-web-ui
+            portName: http
+            port: 80
+            targetPort: 80
+          - path: /api/validator
+            pathType: Prefix
+            serviceName: validator-app
+            portName: val-http
+            port: 5003
+            targetPort: 5003
+
+      - fqdn: cns.validator.NETWORKINGRESS_INTERNAL_SUBDOMAIN.INGRESS_INTERNAL_DOMAIN
+        alias: cns.validator.NETWORK.INGRESS_EXTERNAL_DOMAIN
+        protocol: HTTP
+        name: http
+        paths:
+          - path: /
+            pathType: Prefix
+            serviceName: ans-web-ui
+            portName: http
+            port: 80
+            targetPort: 80
+          - path: /api/validator
+            pathType: Prefix
+            serviceName: validator-app
+            portName: val-http
+            port: 5003
+            targetPort: 5003

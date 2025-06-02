@@ -31,7 +31,7 @@ for source_file in "$source_dir"/*.yaml; do
     # Check if there are any .yaml files
     if [ ! -f "$source_file" ]; then
         echo "No .yaml files found in source directory"
-        exit 0
+        exit 1
     fi
     
     # Get the basename of the file

@@ -1,0 +1,16 @@
+---
+apiVersion: v2
+name: participant
+description: Canton Network Validator - NETWORK - participant
+type: application
+version: 1.0.0
+
+dependencies:
+  - name: splice-participant
+    version: "CHART_VERSION"
+    repository: "oci://ghcr.io/digital-asset/decentralized-canton-sync/helm"
+    alias: participant
+  - name: canton-validator-template
+    version: "1.0.3"
+    repository: "file://../../templates/canton-validator-template"
+    alias: template
