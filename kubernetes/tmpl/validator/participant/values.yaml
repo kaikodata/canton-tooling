@@ -1,0 +1,34 @@
+---
+participant:
+  pvc:
+#    volumeName: domain-migration-validator-pvc
+    volumeStorageClass: csi-cinder-high-speed
+  pod:
+    annotations:
+      prometheus.io/path: /metrics
+      prometheus.io/port: "10013"
+      prometheus.io/scrape: "true"
+
+template:
+  name: participant
+
+  ingress:
+    enabled: true
+
+  service:
+    type: ClusterIP
+    ports:
+      - name: lg-api
+        port: 5001
+        protocol: GRPC
+        targetPort: 5001
+
+      - name: lg-adm-api
+        port: 5002
+        protocol: GRPC
+        targetPort: 5002
+
+      - name: json-api
+        port: 7575
+        protocol: HTTP
+        targetPort: 7575

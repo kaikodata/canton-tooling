@@ -1,0 +1,4 @@
+---
+postgres:
+  db:
+    volumeStorageClass: csi-cinder-high-speed

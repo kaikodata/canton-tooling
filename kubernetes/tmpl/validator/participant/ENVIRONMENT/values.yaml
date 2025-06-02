@@ -1,0 +1,14 @@
+---
+participant:
+  resources:
+    limits:
+      cpu: 2
+      memory: 12Gi
+    requests:
+      cpu: 500m
+      memory: 8Gi
+
+template:
+  namespace: canton-val-NETWORK
+  environment: ENVIRONMENT
+  imageTag: CHART_VERSION
