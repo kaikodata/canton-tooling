@@ -7,7 +7,7 @@ participant-pg-secret=postgres-secrets
 https://OIDC_AUTHORITY_URL/.well-known/jwks.json=DONT REPLACE IF USING AUTH0 BUT COULD BE DIFFERENT (OKTA for EX)
 
 CHART_VERSION=0.3.21
-TEMPLATE_VERSION=1.0.3
+TEMPLATE_VERSION=1.1.0
 
 MIGRATION_ID=3
 SPONSOR_SV_URL=https://sv.sv-2.test.global.canton.network.digitalasset.com
@@ -40,3 +40,13 @@ INGRESS_TYPE=nginx
 INGRESS_INTERNAL_SUBDOMAIN=.eu
 INGRESS_INTERNAL_DOMAIN=k8s.internal.COMPANY_DOMAIN
 INGRESS_EXTERNAL_DOMAIN=COMPANY_DOMAIN
+
+PARTICIPANT_JSON_API_PREFIX=/api/json-api if using DA Utility, / otherwise
+JFROG_DA_UTILITY_REGCRED=digitalasset-canton-network-utility-docker.jfrog.io-regcred
+JFROG_DA_UTILITY_EMAIL=
+JFROG_DA_UTILITY_AUTH=
+$IMAGE_LOCATION=digitalasset-canton-network-utility-docker.jfrog.io/frontend
+$IMAGE_VERSION=0.5.3 for testnet/mainnet, 0.6.0 for devnet
+DA_UTILITY_OPERATOR_PARTY=check DA Utility docs, different between ENVs
+$AUTH_AUDIENCE=https://validator.SAME_AS_INGRESS_EXTERNAL_DOMAIN
+$AUTH_CLIENT_ID=

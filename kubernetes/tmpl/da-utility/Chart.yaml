@@ -1,0 +1,12 @@
+---
+apiVersion: v2
+name: da-network-utility
+description: Digital Asset Network Utility - NETWORK
+type: application
+version: 1.0.0
+
+dependencies:
+  - name: canton-validator-template
+    version: "TEMPLATE_VERSION"
+    repository: "file://../../templates/canton-validator-template"
+    alias: template

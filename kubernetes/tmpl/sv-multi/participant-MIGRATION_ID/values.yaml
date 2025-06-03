@@ -9,8 +9,6 @@ participant:
       prometheus.io/port: "10013"
       prometheus.io/scrape: "true"
 
-  jsonApiServerPathPrefix: PARTICIPANT_JSON_API_PREFIX
-
 template:
   name: participant
 

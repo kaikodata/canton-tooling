@@ -1,0 +1,30 @@
+---
+template:
+  name: utility-ui
+  namespace: canton-val-NETWORK
+  environment: ENVIRONMENT
+  imageTag: CHART_VERSION
+
+  ingress:
+    enabled: true
+
+  service:
+    type: ClusterIP
+    ports:
+      - fqdn: danu.validator.NETWORKINGRESS_INTERNAL_SUBDOMAIN.INGRESS_INTERNAL_DOMAIN
+        alias: danu.validator.NETWORK.INGRESS_EXTERNAL_DOMAIN
+        name: http
+        protocol: HTTP
+        paths:
+          - path: /
+            pathType: Prefix
+            serviceName: utility-ui
+            portName: http
+          - path: /api/validator
+            pathType: Prefix
+            serviceName: validator-app
+            portName: val-http
+          - path: PARTICIPANT_JSON_API_PREFIX
+            pathType: Prefix
+            serviceName: participant
+            portName: json-api
