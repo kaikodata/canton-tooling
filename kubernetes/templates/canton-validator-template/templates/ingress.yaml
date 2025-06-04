@@ -1,0 +1,73 @@
+{{- include "checkNamespace" . }}
+{{- $selectorLabel := printf "app.kubernetes.io/instance: %s" $.Values.name }}
+{{- if and $.Values.ingress $.Values.ingress.enabled }}
+{{- include "checkEnvironment" $ }}
+{{- range $port := $.Values.service.ports }}
+{{- if not (or (eq $port.protocol "HTTP") (eq $port.protocol "HTTPS") (eq $port.protocol "AUTO_HTTP") (eq $port.protocol "GRPC") (eq $port.protocol "GRPCS") (eq $port.protocol "FCGI")) }}
+{{- fail (printf "Error: 'ingress.protocol' must be one of HTTP, HTTPS, AUTO_HTTP, GRPC, GRPCS, and FCGI, but got '%s'" $port.protocol) }}
+{{- end }}
+
+{{- $hostname := printf "%s" $.Values.name }}
+{{- if $port.serviceName -}}
+{{- if and $.Values.ingress.enabled (gt (len $.Values.service.ports) 1) }}
+{{- $hostname = printf "%s-%s-%s" $hostname $port.serviceName $port.name }}
+{{- end -}}
+{{- else -}}
+{{- $hostname = printf "%s-%s" $hostname $port.name }}
+{{- end -}}
+
+{{- if and (eq (len $.Values.service.ports) 1) (eq $port.name "") }}
+{{- $selectorLabel = printf "app.kubernetes.io/instance: %s" $.Values.name }}
+{{- else }}
+{{- $selectorLabel = printf "app.kubernetes.io/instance: %s-%s" $.Values.name ($port.name | lower)}}
+{{- end }}
+{{- $subdomain := include "subdomain" $ -}}
+{{- $fqdn := ($port.fqdn | default (printf "%s.%s.%s%s" $hostname $.Values.namespace $subdomain $.Values.ingress.domain )) }}
+
+{{- $serviceName := $port.serviceName | default $.Values.name }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: {{ $fqdn }}
+    kubernetes.io/ingress.class: nginx-internal
+    nginx.ingress.kubernetes.io/backend-protocol: "{{ $port.protocol }}"
+    {{- if $port.alias }}
+    nginx.ingress.kubernetes.io/server-alias: "{{ join "," $port.alias }}"
+    {{- end }}
+  name: {{ printf "%s-%s" $fqdn $hostname }}
+  namespace: {{ $.Values.namespace | quote }}
+  labels:
+    {{- with $.Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- include "service.labels" $ | nindent 4 }}
+    {{ $selectorLabel }}
+spec:
+  ingressClassName: nginx-internal
+  rules:
+    - host: {{ $fqdn }}
+      http:
+        paths:
+          {{- if $port.paths }}
+          {{- range $path := $port.paths }}
+          - backend:
+              service:
+                name: {{ $path.serviceName | default $serviceName }}
+                port:
+                  name: {{ $path.portName | default $port.name }}
+            path: {{ $path.path | default "/" }}
+            pathType: {{ $path.pathType | default "ImplementationSpecific" }}
+          {{- end }}
+          {{- else }}
+          - backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  name: {{ $port.name }}
+            path: /
+            pathType: ImplementationSpecific
+          {{- end }}
+{{- end }}
+{{- end }}
