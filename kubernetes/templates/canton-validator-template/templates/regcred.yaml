@@ -1,0 +1,30 @@
+{{- range $secret := $.Values.regcreds }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $secret.name }}-regcred
+  namespace: {{ $.Values.namespace | default "internal" | quote }}
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: {{ include "dockerconfigjson" $secret | b64enc }}
+---
+{{- end }}
+
+{{- define "dockerconfigjson" }}
+{{- $registryConfig := dict }}
+{{- if .username }}
+{{- $_ := set $registryConfig "username" .username }}
+{{- end }}
+{{- if .password }}
+{{- $_ := set $registryConfig "password" .password }}
+{{- end }}
+{{- if .email }}
+{{- $_ := set $registryConfig "email" .email }}
+{{- end }}
+{{- if .auth }}
+{{- $_ := set $registryConfig "auth" .auth }}
+{{- end }}
+{{- $auths := dict .registry $registryConfig }}
+{{ dict "auths" $auths | toJson }}
+{{- end }}

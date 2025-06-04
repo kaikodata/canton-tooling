@@ -1,0 +1,31 @@
+---
+# to be set in child chart:
+# eg:
+name: my-service-name
+# namespace on canton looks like : "canton-[val|sv]-[devnet|testnet|mainnet]"
+namespace:
+
+# must be set for each environment (It must be either 'staging-priv', 'production-eu-priv' or 'production-us-priv')
+environment: ""
+
+ingress:
+  enabled: false
+  # the final URL will be {{ Values.name }}-{{ Values.component.name }}{{ Values.ingress.environment }}.{{ Values.ingress.domain }}
+  # example: "service-componentINGRESS_INTERNAL_SUBDOMAIN.INGRESS_INTERNAL_DOMAIN" (environment="INGRESS_INTERNAL_SUBDOMAIN", domain="INGRESS_INTERNAL_DOMAIN")
+  domain: "INGRESS_INTERNAL_DOMAIN"
+  # to set the subdomain, please set the variable 'environment'
+  # protocol can be one on HTTP, HTTPS, AUTO_HTTP, GRPC, GRPCS and FCGI
+  # see https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#backend-protocol
+
+service:
+  type: ClusterIP
+  ports: []
+    # - name: grpc
+    #   protocol: "GRPC"
+    #   port: 8090
+    #   targetPort: 8090
+    #   path: /path # default path is "/"
+    #   pathType: Prefix # default pathType is "ImplementationSpecific"
+    #   alias: external facing HTTP hostname (for websites mostly)
+    #   fqdn: wallet.validator.NETWORKINGRESS_INTERNAL_SUBDOMAIN.INGRESS_INTERNAL_DOMAIN
+    #   serviceName: wallet-web-ui
