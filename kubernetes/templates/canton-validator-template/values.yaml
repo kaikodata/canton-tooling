@@ -5,8 +5,14 @@ name: my-service-name
 # namespace on canton looks like : "canton-[val|sv]-[devnet|testnet|mainnet]"
 namespace:
 
+# set to true to have Deployment object handled by that template (da-utility/pqs/...)
+deployment: false
+
 # must be set for each environment (It must be either 'staging-priv', 'production-eu-priv' or 'production-us-priv')
 environment: ""
+
+imagePullPolicy: IfNotPresent
+imagePullSecrets: [ name: secret-name ]
 
 ingress:
   enabled: false
@@ -18,6 +24,7 @@ ingress:
   # see https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#backend-protocol
 
 service:
+  enabled: false
   type: ClusterIP
   ports: []
     # - name: grpc

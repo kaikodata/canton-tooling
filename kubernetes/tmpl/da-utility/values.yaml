@@ -1,30 +1,24 @@
 ---
 template:
   name: utility-ui
-  namespace: canton-val-NETWORK
-  environment: ENVIRONMENT
-  imageTag: CHART_VERSION
+
+  deployment: true
+
+  imagePullSecrets:
+    - name: "DA_UTILITY_JFROG_REGCRED"
+  imageRepository: DA_UTILITY_IMAGE_LOCATION
 
   ingress:
     enabled: true
 
-  service:
-    type: ClusterIP
-    ports:
-      - fqdn: danu.validator.NETWORKINGRESS_INTERNAL_SUBDOMAIN.INGRESS_INTERNAL_DOMAIN
-        alias: danu.validator.NETWORK.INGRESS_EXTERNAL_DOMAIN
-        name: http
-        protocol: HTTP
-        paths:
-          - path: /
-            pathType: Prefix
-            serviceName: utility-ui
-            portName: http
-          - path: /api/validator
-            pathType: Prefix
-            serviceName: validator-app
-            portName: val-http
-          - path: PARTICIPANT_JSON_API_PREFIX
-            pathType: Prefix
-            serviceName: participant
-            portName: json-api
+  replicaCount: 1
+
+  resources:
+    requests:
+      cpu: 0.1
+      memory: 240Mi
+    limits:
+      cpu: 1
+      memory: 1536Mi
+
+  strategy: Recreate

@@ -1,0 +1,47 @@
+---
+template:
+  name: pqs
+  namespace: NAMESPACE
+
+  deployment: true
+
+  imagePullSecrets:
+    - name: "digitalasset-docker.jfrog.io-regcred"
+  imageRepository: "digitalasset-docker.jfrog.io/participant-query-store"
+
+  replicaCount: 1
+
+  args:
+    - pipeline
+    - ledger
+    - postgres-document
+  livenessProbe:
+    httpGet:
+      path: /livez
+      port: 8080
+  volumeMounts:
+    - mountPath: /tmp
+      name: pqs-tmp
+  volumes:
+    - emptyDir:
+        sizeLimit: 5Gi
+      name: pqs-tmp
+
+  podAnnotations:
+    prometheus.io/path: /metrics
+    prometheus.io/port: "9090"
+    prometheus.io/scrape: "true"
+
+  service:
+    enabled: true
+    type: ClusterIP
+    ports:
+      - name: liveness
+        port: 8080
+        protocol: HTTP
+      - name: metrics
+        port: 9090
+        protocol: HTTP
+      - name: diagnostics
+        port: 9091
+        protocol: TCP

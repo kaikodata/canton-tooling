@@ -1,0 +1,33 @@
+{{ $root := . }}
+{{- include "checkNamespace" . }}
+{{- if and (hasKey $.Values.service "enabled") (eq $.Values.service.enabled true) }}
+{{- $selectorLabel := printf "app.kubernetes.io/instance: %s" $.Values.name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Values.name }}
+  namespace: {{ $.Values.namespace | quote }}
+  labels:
+    {{- with $.Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- include "service.labels" $ | nindent 4 }}
+    {{ $selectorLabel }}
+spec:
+  selector:
+    {{ $selectorLabel }}
+  type: {{ $.Values.service.type }}
+  {{- if $.Values.service.headless }}
+  clusterIP: None
+  {{- end }}
+  ports:
+  {{- range $port := $.Values.service.ports }}
+    - name: {{ $port.name }}
+      port: {{ $port.port }}
+      {{- if and (hasKey $port "targetPort") (ne $port.targetPort $port.port) }}
+      targetPort: {{ $port.targetPort }}
+      {{- end }}
+      protocol: TCP
+  {{- end }}
+{{- end }}
