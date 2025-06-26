@@ -1,0 +1,37 @@
+---
+template:
+  namespace: canton-val-NETWORK
+
+  environment: ENVIRONMENT
+
+  env:
+    AUTH_AUDIENCE: "DA_UTILITY_AUTH_AUDIENCE"
+    AUTH_AUTHORITY: "OIDC_AUTHORITY_URL"
+    AUTH_CLIENT_ID: "{{ .Values.secret.oauth_clientid }}"
+    UTILITY_APP_OPERATOR_PARTY_ID: "DA_UTILITY_APP_OPERATOR_PARTY_ID"
+    UTILITY_APP_UTILITY_BACKEND_URL: "DA_UTILITY_APP_UTILITY_BACKEND_URL"
+
+  imageTag: DA_UTILITY_IMAGE_VERSION
+
+  service:
+    enabled: true
+    type: ClusterIP
+    ports:
+      - fqdn: danu.validator.NETWORKINGRESS_INTERNAL_SUBDOMAIN.INGRESS_INTERNAL_DOMAIN
+        alias: danu.validator.NETWORK.INGRESS_EXTERNAL_DOMAIN
+        name: http
+        port: 8080
+        protocol: HTTP
+        paths:
+          - path: /
+            pathType: Prefix
+            serviceName: utility-ui
+            portName: http
+          - path: /api/validator
+            pathType: Prefix
+            serviceName: validator-app
+            portName: val-http
+          - path: PARTICIPANT_JSON_API_PREFIX
+            pathType: Prefix
+            serviceName: participant
+            portName: json-api

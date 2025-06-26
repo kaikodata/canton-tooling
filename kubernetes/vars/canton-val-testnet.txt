@@ -6,10 +6,10 @@ participant-pg-secret=postgres-secrets
 
 https://OIDC_AUTHORITY_URL/.well-known/jwks.json=DONT REPLACE IF USING AUTH0 BUT COULD BE DIFFERENT (OKTA for EX)
 
-CHART_VERSION=0.3.21
-TEMPLATE_VERSION=1.1.0
+CHART_VERSION=0.4.1
+TEMPLATE_VERSION=1.3.1
 
-MIGRATION_ID=3
+MIGRATION_ID=4
 SPONSOR_SV_URL=https://sv.sv-2.test.global.canton.network.digitalasset.com
 TRUSTED_SCAN_URL=https://scan.sv-2.test.global.canton.network.digitalasset.com
 YOUR_VALIDATOR_NODE_NAME=COMPANYNAME-testnet-1
@@ -27,7 +27,7 @@ OIDC_AUTHORITY_VALIDATOR_AUDIENCE=https://validator.SAME_AS_INGRESS_EXTERNAL_DOM
 validatorWalletUsers:=validatorWalletUsers: ['"sub1"', '"sub2"', '"sub3"'] # OIDC subs could be emails (Okta), that's why I double quote
 
 ONBOARDING_SECRET=
-POSTGRES_PASSWORD=
+VALIDATOR_POSTGRES_PASSWORD=
 LEDGER_API_USER=SAME_AS_VALIDATOR_CLIENT_ID@clients if using Auth0, SAME_AS_VALIDATOR_CLIENT_ID otherwise
 VALIDATOR_CLIENT_ID=
 VALIDATOR_CLIENT_SECRET=
@@ -42,11 +42,28 @@ INGRESS_INTERNAL_DOMAIN=k8s.internal.COMPANY_DOMAIN
 INGRESS_EXTERNAL_DOMAIN=COMPANY_DOMAIN
 
 PARTICIPANT_JSON_API_PREFIX=/api/json-api if using DA Utility, / otherwise
-JFROG_DA_UTILITY_REGCRED=digitalasset-canton-network-utility-docker.jfrog.io-regcred
-JFROG_DA_UTILITY_EMAIL=
-JFROG_DA_UTILITY_AUTH=
-$IMAGE_LOCATION=digitalasset-canton-network-utility-docker.jfrog.io/frontend
-$IMAGE_VERSION=0.5.3 for testnet/mainnet, 0.6.0 for devnet
-DA_UTILITY_OPERATOR_PARTY=check DA Utility docs, different between ENVs
-$AUTH_AUDIENCE=https://validator.SAME_AS_INGRESS_EXTERNAL_DOMAIN
-$AUTH_CLIENT_ID=
+
+DA_UTILITY_APP_OPERATOR_PARTY_ID=auth0_007c66019993301e3ed49d0e36e9::12206268795b181eafd1432facbb3a3c5711f1f8b743ea0e9c0050b32126b33071fa # check DA Utility docs, different between ENVs
+DA_UTILITY_APP_UTILITY_BACKEND_URL=https://api.utilities.digitalasset-staging.com # check DA Utility docs, different between ENVs
+DA_UTILITY_AUTH_AUDIENCE=https://validator.SAME_AS_INGRESS_EXTERNAL_DOMAIN
+DA_UTILITY_AUTH_CLIENT_ID=
+DA_UTILITY_IMAGE_LOCATION=digitalasset-canton-network-utility-docker.jfrog.io/frontend
+DA_UTILITY_IMAGE_VERSION=0.5.3 for canton 3.2/splice 0.3.x // 0.6.1 for canton 3.3/splice 0.4.x
+DA_UTILITY_JFROG_AUTH=
+DA_UTILITY_JFROG_EMAIL=
+DA_UTILITY_JFROG_REGCRED=digitalasset-canton-network-utility-docker.jfrog.io-regcred
+
+DA_PQS_IMAGE_LOCATION=digitalasset-docker.jfrog.io/ui-utility
+DA_PQS_IMAGE_VERSION=0.6.1 for mainnet, 0.7.1 for devnet/testnet
+DA_PQS_LEDGER_HOST=participant
+DA_PQS_LEDGER_PORT=5001
+DA_PQS_PG_DB=canton_pqs
+DA_PQS_PG_HOST=YOUR_PG_HOSTNAME
+DA_PQS_PG_PWD=YOUR_PG_PASSWORD
+DA_PQS_PG_USER=YOUR_PG_USER
+DA_PQS_OAUTH_CLIENT_ID=
+DA_PQS_OAUTH_CLIENT_SECRET=
+DA_PQS_OAUTH_ENDPOINT=YOUR_OIDC_TOKEN_ENDPOINT
+DA_PQS_JFROG_AUTH=BASE64_JFROG_AUTH_TOKEN
+DA_PQS_JFROG_EMAIL=YOUR_JFROG_ACCOUNT_EMAIL
+DA_PQS_JFROG_REGCRED=digitalasset-canton-network-utility-docker.jfrog.io-regcred

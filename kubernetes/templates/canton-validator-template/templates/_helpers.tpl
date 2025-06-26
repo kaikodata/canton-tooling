@@ -14,7 +14,7 @@ Expand the name of the chart.
 
 {{- define "checkEnvironment" -}}
 {{- if not (or (eq .Values.environment "staging-priv") (eq .Values.environment "production-us-priv") (eq .Values.environment "production-eu-priv")) }}
-{{- fail "Error: 'environment' is not defined. It must be either 'production-us', 'staging', 'staging-priv', or 'production-eu'" }}
+{{- fail "Error: 'environment' is not defined. It must be either 'staging-priv', or 'production-eu-priv' or 'production-us-priv'" }}
 {{- end }}
 {{- end }}
 
