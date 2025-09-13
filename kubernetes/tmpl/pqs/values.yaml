@@ -7,7 +7,7 @@ template:
 
   imagePullSecrets:
     - name: "digitalasset-docker.jfrog.io-regcred"
-  imageRepository: "digitalasset-docker.jfrog.io/participant-query-store"
+  imageRepository: "digitalasset-docker.jfrog.io/participant-query-store" # https://digitalasset.jfrog.io/ui/packages/docker:%2F%2Fparticipant-query-store?name=participant&type=packages
 
   replicaCount: 1
 
@@ -15,6 +15,7 @@ template:
     - pipeline
     - ledger
     - postgres-document
+    - --pipeline-datasource=TransactionTreeStream
   livenessProbe:
     httpGet:
       path: /livez
