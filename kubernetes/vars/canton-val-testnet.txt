@@ -6,7 +6,7 @@ participant-pg-secret=postgres-secrets
 
 https://OIDC_AUTHORITY_URL/.well-known/jwks.json=DONT REPLACE IF USING AUTH0 BUT COULD BE DIFFERENT (OKTA for EX)
 
-CHART_VERSION=0.4.1
+CHART_VERSION=0.4.14
 TEMPLATE_VERSION=1.3.1
 
 MIGRATION_ID=4
@@ -48,13 +48,13 @@ DA_UTILITY_APP_UTILITY_BACKEND_URL=https://api.utilities.digitalasset-staging.co
 DA_UTILITY_AUTH_AUDIENCE=https://validator.SAME_AS_INGRESS_EXTERNAL_DOMAIN
 DA_UTILITY_AUTH_CLIENT_ID=
 DA_UTILITY_IMAGE_LOCATION=digitalasset-canton-network-utility-docker.jfrog.io/frontend
-DA_UTILITY_IMAGE_VERSION=0.5.3 for canton 3.2/splice 0.3.x // 0.6.1 for canton 3.3/splice 0.4.x
+DA_UTILITY_IMAGE_VERSION=0.7.8
 DA_UTILITY_JFROG_AUTH=
 DA_UTILITY_JFROG_EMAIL=
 DA_UTILITY_JFROG_REGCRED=digitalasset-canton-network-utility-docker.jfrog.io-regcred
 
-DA_PQS_IMAGE_LOCATION=digitalasset-docker.jfrog.io/ui-utility
-DA_PQS_IMAGE_VERSION=0.6.1 for mainnet, 0.7.1 for devnet/testnet
+DA_PQS_IMAGE_LOCATION=digitalasset-docker.jfrog.io/ui-utility # https://digitalasset.jfrog.io/ui/native/scribe
+DA_PQS_IMAGE_VERSION=0.6.8
 DA_PQS_LEDGER_HOST=participant
 DA_PQS_LEDGER_PORT=5001
 DA_PQS_PG_DB=canton_pqs
