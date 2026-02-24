@@ -12,8 +12,9 @@ To use the script, ensure the following are installed:
   pip install pyyaml
   ```
 - **Git**: Optional, for `--use-gitignore` to update the repository’s `.gitignore`.
+- **SOPS**: Optional, for decrypting SOPS-encrypted JSON secrets files. Install from [mozilla/sops](https://github.com/getsops/sops).
 - A **template directory** (e.g., `canton-sv-template/`) containing files and directories with placeholders (e.g., `MIGRATION_ID`, `ENVIRONMENT`).
-- An **environment file** (e.g., `canton-envs/canton-sv-devnet1.txt`) with key-value pairs for substitutions (e.g., `ENVIRONMENT=canton-sv-devnet1`).
+- **Environment variables** provided via one of the supported formats (see [Environment File Formats](#environment-file-formats) below).
 
 ## Usage
 
@@ -25,14 +26,14 @@ Run the script from the command line, providing the required arguments and optio
 
 - **`<src_dir>`**: Path to the template directory (e.g., `canton-sv-template/`).
 - **`<dest_dir>`**: Path to the output directory (e.g., `canton-sv-devnet1/`).
-- **`<env_file>`**: Path to the environment file with variable definitions (e.g., `canton-envs/canton-sv-devnet1.txt`).
+- **`<env_file>`**: Path to environment variables. Accepts a base path, a `.json` file, or a legacy `.txt` file (see [Environment File Formats](#environment-file-formats)).
 
 ### Command-Line Arguments
 
 #### Mandatory Arguments
 - `src_dir`: Source directory containing templates.
 - `dest_dir`: Destination directory for processed templates.
-- `env_file`: File containing environment variables (key-value pairs, e.g., `KEY=VALUE`).
+- `env_file`: Environment variables source — base path, `.json` file, or legacy `.txt` file (see [Environment File Formats](#environment-file-formats)).
 
 #### Optional Arguments
 - `-h`, `--help`: Show the help message and exit.
@@ -45,6 +46,48 @@ Run the script from the command line, providing the required arguments and optio
   - Falls back to `dest_dir/.gitignore` if no Git repo is found.
 
 If an invalid parameter is provided (e.g., `--invalid-flag`), the script displays the help message and exits.
+
+## Environment File Formats
+
+The `env_file` argument supports three modes depending on the path provided:
+
+### Mode 1: Base path (recommended)
+When the path has **no extension**, the script loads two JSON files by convention:
+- `<base>-values.json` — cleartext key-value pairs
+- `<base>-secrets.json` — SOPS-encrypted key-value pairs (decrypted in memory)
+
+Both files are merged, with secrets overriding values on key collision. Either file can be absent (a warning is logged).
+
+```bash
+# Given env_file = canton-envs/canton-val-devnet1
+# Loads: canton-envs/canton-val-devnet1-values.json  (cleartext)
+#        canton-envs/canton-val-devnet1-secrets.json  (SOPS-encrypted)
+./canton-templating.py canton-sv-template/ canton-sv-devnet1/ canton-envs/canton-val-devnet1
+```
+
+### Mode 2: Single `.json` file
+When the path ends with `.json`, the script loads that single file. If it contains a `sops` key, it is automatically decrypted in memory.
+
+```bash
+./canton-templating.py canton-sv-template/ canton-sv-devnet1/ canton-envs/canton-sv-devnet1.json
+```
+
+### Mode 3: Legacy `.txt` file
+When the path ends with `.txt`, the original `KEY=VALUE` line-based format is used (backward compatible).
+
+```bash
+./canton-templating.py canton-sv-template/ canton-sv-devnet1/ canton-envs/canton-sv-devnet1.txt
+```
+
+### JSON file format
+JSON environment files must contain a flat object with string keys and values:
+```json
+{
+  "ENVIRONMENT": "canton-sv-devnet1",
+  "MIGRATION_ID": "3",
+  "NODE_NAME": "my-node"
+}
+```
 
 ## Features
 
@@ -67,8 +110,18 @@ If an invalid parameter is provided (e.g., `--invalid-flag`), the script display
 
 ## Examples
 
-### Basic Usage
-Process templates without optional flags:
+### Basic Usage (JSON, base path)
+Process templates using the JSON base-path convention (values + SOPS secrets):
+
+```bash
+./canton-templating.py canton-sv-template/ canton-sv-devnet1/ canton-envs/canton-sv-devnet1 --alias-prefix
+```
+
+- Loads `canton-envs/canton-sv-devnet1-values.json` and `canton-envs/canton-sv-devnet1-secrets.json`.
+- Creates `canton-sv-devnet1/.gitignore` with symlink paths.
+
+### Basic Usage (legacy .txt)
+Process templates with a legacy `.txt` environment file:
 
 ```bash
 ./canton-templating.py canton-sv-template/ canton-sv-devnet1/ canton-envs/canton-sv-devnet1.txt
@@ -116,6 +169,8 @@ Test an invalid flag:
 - **No `.gitignore` Created**: Ensure `dest_dir` is writable. If using `--use-gitignore`, verify a Git repository exists (contains a `.git` directory).
 - **Nested Symlinks**: Should not occur due to symlink cleanup. If seen, share `find canton-sv-devnet1/ -type l | xargs ls -ltr` output.
 - **Substitution Issues**: Check the environment file for correct key-value pairs. Use `--debug` to log substitutions.
+- **SOPS Decryption Fails**: Ensure `sops` is installed and you have access to the decryption key (e.g., AWS KMS, GCP KMS, or age key). Check the error message in the output.
+- **JSON Parse Errors**: Ensure JSON files contain a valid flat `{"KEY": "VALUE"}` object. Nested objects are not supported.
 - **Invalid Parameters**: Run with `--help` to see available arguments.
 
 For issues, share:
