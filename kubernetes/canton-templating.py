@@ -4,6 +4,8 @@ import re
 import shutil
 import logging
 import sys
+import json
+import subprocess
 from pathlib import Path
 import yaml
 import argparse
@@ -13,28 +15,85 @@ def setup_logging(debug):
     level = logging.DEBUG if debug else logging.INFO
     logging.basicConfig(level=level, format='%(asctime)s - %(levelname)s:%(message)s')
 
+def load_json_file(file_path, decrypt=False):
+    """Load a JSON file, optionally decrypting with SOPS in memory."""
+    with open(file_path, 'r', encoding='utf-8') as f:
+        raw = json.load(f)
+    if decrypt and isinstance(raw, dict) and 'sops' in raw:
+        logging.info(f"SOPS-encrypted file detected, decrypting {file_path} in memory")
+        result = subprocess.run(
+            ['sops', '-d', file_path],
+            capture_output=True, text=True
+        )
+        if result.returncode != 0:
+            logging.error(f"sops decryption failed for {file_path}: {result.stderr.strip()}")
+            print(f"ERROR: sops decryption failed for {file_path}: {result.stderr.strip()}")
+            return {}
+        raw = json.loads(result.stdout)
+    if not isinstance(raw, dict):
+        logging.error(f"JSON file {file_path} must contain a flat object")
+        print(f"ERROR: JSON file {file_path} must contain a flat object")
+        return {}
+    return {str(k): str(v) for k, v in raw.items()}
+
 def load_env_vars(env_file_path):
-    """Load environment variables from a file into a dictionary."""
+    """Load environment variables from JSON files or a legacy .txt file.
+
+    Supports three modes based on the path provided:
+    - Base path (no extension): loads <base>-values.json (cleartext) and
+      <base>-secrets.json (SOPS-encrypted), merging both.
+    - .json file: loads a single JSON file (auto-detects SOPS encryption).
+    - .txt file: loads legacy key=value format.
+    """
     env_vars = {}
-    if not os.path.isfile(env_file_path):
-        logging.error(f"Environment file {env_file_path} does not exist or is not a file")
-        print(f"ERROR: Environment file {env_file_path} does not exist or is not a file")
-        return env_vars
-    
+
     try:
-        with open(env_file_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                line = line.strip()
-                if line:
-                    try:
-                        key, value = line.split('=', 1)
-                        env_vars[key.strip()] = value.strip()
-                    except ValueError:
-                        logging.warning(f"Skipping invalid line in {env_file_path}: {line}")
+        # Mode 1: base path -> load <base>-values.json + <base>-secrets.json
+        if not env_file_path.endswith(('.json', '.txt')):
+            values_file = f"{env_file_path}-values.json"
+            secrets_file = f"{env_file_path}-secrets.json"
+            if os.path.isfile(values_file):
+                logging.info(f"Loading values from {values_file}")
+                env_vars.update(load_json_file(values_file))
+            else:
+                logging.warning(f"Values file {values_file} not found, skipping")
+            if os.path.isfile(secrets_file):
+                logging.info(f"Loading secrets from {secrets_file}")
+                env_vars.update(load_json_file(secrets_file, decrypt=True))
+            else:
+                logging.warning(f"Secrets file {secrets_file} not found, skipping")
+            if not env_vars:
+                logging.error(f"No env files found for base path {env_file_path}")
+                print(f"ERROR: No env files found for base path {env_file_path}")
+            return env_vars
+
+        # Mode 2: single .json file
+        if not os.path.isfile(env_file_path):
+            logging.error(f"Environment file {env_file_path} does not exist or is not a file")
+            print(f"ERROR: Environment file {env_file_path} does not exist or is not a file")
+            return env_vars
+
+        if env_file_path.endswith('.json'):
+            env_vars = load_json_file(env_file_path, decrypt=True)
+        else:
+            # Mode 3: legacy .txt file
+            with open(env_file_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        try:
+                            key, value = line.split('=', 1)
+                            env_vars[key.strip()] = value.strip()
+                        except ValueError:
+                            logging.warning(f"Skipping invalid line in {env_file_path}: {line}")
         logging.debug(f"Loaded environment variables from {env_file_path}: {env_vars}")
         if not env_vars:
             logging.warning(f"Environment file {env_file_path} is empty")
             print(f"WARNING: Environment file {env_file_path} is empty")
+        return env_vars
+    except json.JSONDecodeError as e:
+        logging.error(f"Failed to parse JSON environment file {env_file_path}: {e}")
+        print(f"ERROR: Failed to parse JSON environment file {env_file_path}: {e}")
         return env_vars
     except Exception as e:
         logging.error(f"Failed to read environment file {env_file_path}: {e}")

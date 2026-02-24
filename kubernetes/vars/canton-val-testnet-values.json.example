@@ -1,0 +1,66 @@
+{
+  "host: postgres": "host: postgres.canton-val-testnet.svc.cluster.local.",
+  "host: participant-pg": "host: postgres.canton-val-testnet.svc.cluster.local.",
+  "volumeSize: 50Gi": "volumeSize: 10Gi",
+  "participant-pg-secret": "postgres-secrets",
+  "# migrating: true": "migrating: false",
+
+  "CHART_VERSION": "0.5.10",
+  "TEMPLATE_VERSION": "1.3.1",
+  "MIGRATION_ID": "1",
+  "SPONSOR_SV_URL": "https://sv.sv-2.test.global.canton.network.digitalasset.com",
+  "TRUSTED_SCAN_URL": "https://scan.sv-2.test.global.canton.network.digitalasset.com",
+  "YOUR_VALIDATOR_NODE_NAME": "COMPANYNAME-testnet-1",
+  "YOUR_VALIDATOR_PARTY_HINT": "COMPANYNAME-testnet-1",
+
+  "ENVIRONMENT": "YOUR_K8S_CLUSTER_OR_ENV_NAME",
+  "NAMESPACE": "canton-val-testnet",
+  "NETWORK": "testnet",
+  "NODEPOOL": "",
+
+  "OIDC_AUTHORITY_LEDGER_API_AUDIENCE": "https://validator.YOUR_EXTERNAL_DOMAIN",
+  "OIDC_AUTHORITY_LEDGER_API_SCOPE": "",
+  "OIDC_AUTHORITY_URL": "https://YOUR_OIDC_PROVIDER/",
+  "OIDC_AUTHORITY_VALIDATOR_AUDIENCE": "https://validator.YOUR_EXTERNAL_DOMAIN",
+  "OIDC_AUTHORITY_JWKS": "/v1/keys",
+  "- \"OPERATOR_WALLET_USER_ID\"": "",
+  "validatorWalletUsers:": "validatorWalletUsers: ['\"sub1\"', '\"sub2\"']",
+  "OPERATOR_WALLET_USER_IDS": "\"sub1\", \"sub2\"",
+
+  "LEDGER_API_USER": "YOUR_OIDC_CLIENT_ID",
+  "YOUR_CONTACT_POINT": "support@YOUR_COMPANY_DOMAIN",
+
+  "INGRESS_TYPE": "nginx",
+  "INGRESS_INTERNAL_SUBDOMAIN": ".eu",
+  "INGRESS_INTERNAL_DOMAIN": "k8s.internal.YOUR_COMPANY_DOMAIN",
+  "INGRESS_EXTERNAL_DOMAIN": "YOUR_COMPANY_DOMAIN",
+
+  "PARTICIPANT_JSON_API_PREFIX": "/api/json-api",
+
+  "DA_UTILITY_APP_OPERATOR_PARTY_ID": "CHECK_DA_UTILITY_DOCS",
+  "DA_UTILITY_APP_UTILITY_BACKEND_URL": "https://api.utilities.digitalasset-staging.com",
+  "DA_UTILITY_AUTH_AUDIENCE": "https://validator.YOUR_EXTERNAL_DOMAIN",
+  "DA_UTILITY_IMAGE_LOCATION": "digitalasset-canton-network-utility-docker.jfrog.io/frontend",
+  "DA_UTILITY_IMAGE_VERSION": "0.7.8",
+
+  "DA_PQS_IMAGE_LOCATION": "digitalasset-docker.jfrog.io/ui-utility",
+  "DA_PQS_IMAGE_VERSION": "0.6.8",
+  "DA_PQS_LEDGER_HOST": "participant",
+  "DA_PQS_LEDGER_PORT": "5001",
+  "DA_PQS_PG_DB": "canton_pqs",
+  "DA_PQS_PG_HOST": "YOUR_PG_HOSTNAME",
+  "DA_PQS_PG_USER": "YOUR_PG_USER",
+  "DA_PQS_OAUTH_ENDPOINT": "https://YOUR_OIDC_PROVIDER/oauth2/YOUR_AUTH_SERVER_ID/v1/token",
+  "DA_PQS_JFROG_EMAIL": "YOUR_JFROG_ACCOUNT_EMAIL",
+  "DA_PQS_JFROG_REGCRED": "digitalasset-canton-network-utility-docker.jfrog.io-regcred",
+
+  "KCNM_OIDC_PROTO": "https",
+  "KCNM_OIDC_HOST": "YOUR_OIDC_HOST",
+  "KCNM_OIDC_PATH": "/oauth2/YOUR_AUTH_SERVER_ID/",
+  "KCNM_PG_DB": "canton_manager",
+  "KCNM_PG_HOST": "YOUR_PG_HOSTNAME",
+  "KCNM_PG_USER": "YOUR_PG_USER",
+  "KCNM_VERSION": "v0.0.3",
+
+  "POSTGRES_PVC_RECLAIM_POLICY": "Delete"
+}
