@@ -346,7 +346,42 @@ def process_directory(src_dir, dest_dir, env_file, debug=False, alias_prefix=Fal
                     if file == 'secrets-clear.yaml':
                         logging.debug(f"Processing secrets-clear.yaml at {src_file} with substitutions only")
                         process_yaml_content(src_file, dest_path=dest_file, env_vars=env_vars, alias=None, alias_prefix=False)
-                        # Add to .gitignore
+                        # Encrypt secrets-clear.yaml -> secrets.yaml with SOPS (only if changed)
+                        secrets_encrypted = os.path.join(new_root, 'secrets.yaml')
+                        need_encrypt = True
+                        if os.path.isfile(secrets_encrypted):
+                            # Decrypt existing secrets.yaml and compare with new secrets-clear.yaml
+                            decrypt_result = subprocess.run(
+                                ['sops', '-d', secrets_encrypted],
+                                capture_output=True, text=True
+                            )
+                            if decrypt_result.returncode == 0:
+                                with open(dest_file, 'r') as f:
+                                    new_content = f.read()
+                                # Compare by parsing YAML to ignore formatting differences
+                                try:
+                                    existing_data = yaml.safe_load(decrypt_result.stdout)
+                                    new_data = yaml.safe_load(new_content)
+                                    if existing_data == new_data:
+                                        need_encrypt = False
+                                        logging.debug(f"secrets unchanged, skipping re-encryption: {secrets_encrypted}")
+                                        print(f"[INFO] secrets unchanged: {os.path.relpath(secrets_encrypted)}")
+                                except yaml.YAMLError as e:
+                                    logging.warning(f"YAML parse error during comparison, will re-encrypt: {e}")
+                        if need_encrypt:
+                            sops_result = subprocess.run(
+                                ['sops', '-e', dest_file],
+                                capture_output=True, text=True
+                            )
+                            if sops_result.returncode == 0:
+                                with open(secrets_encrypted, 'w') as f:
+                                    f.write(sops_result.stdout)
+                                logging.info(f"SOPS encrypted {dest_file} -> {secrets_encrypted}")
+                                print(f"[INFO] SOPS encrypted {os.path.relpath(secrets_encrypted)}")
+                            else:
+                                logging.error(f"SOPS encryption failed for {dest_file}: {sops_result.stderr.strip()}")
+                                print(f"[ERROR] SOPS encryption failed for {dest_file}: {sops_result.stderr.strip()}")
+                        # Add secrets-clear.yaml to .gitignore
                         relative_file_path = os.path.relpath(dest_file, dest_dir)
                         symlink_targets.add(relative_file_path)
                     elif file in ('Chart.yaml', 'values.yaml'):
