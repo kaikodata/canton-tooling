@@ -142,8 +142,7 @@ def get_non_template_alias(chart_yaml_path):
             if alias and alias.strip() and alias != 'template':
                 logging.debug(f"Selected alias '{alias}' from {chart_yaml_path}")
                 return alias
-        logging.warning(f"No non-template alias found in {chart_yaml_path}")
-        print(f"WARNING: No non-template alias found in {chart_yaml_path}")
+        logging.debug(f"No non-template alias found in {chart_yaml_path}")
         return None
     except Exception as e:
         logging.error(f"Failed to parse Chart.yaml at {chart_yaml_path} for alias extraction: {e}")
@@ -184,8 +183,14 @@ def process_yaml_content(src_path, dest_path, env_vars, alias=None, alias_prefix
     
     # Trim trailing whitespace while preserving empty lines
     new_lines = [line.rstrip() + '\n' for line in new_lines]
+    # Remove trailing blank lines
+    while new_lines and new_lines[-1].strip() == '':
+        new_lines.pop()
+    # Ensure file ends with a single newline
+    if new_lines and not new_lines[-1].endswith('\n'):
+        new_lines[-1] += '\n'
     logging.debug(f"Trimmed trailing whitespace in {dest_path}")
-    
+
     if alias and alias_prefix:
         logging.debug(f"Applying alias prefix '{alias}' to {dest_path}")
         indented_lines = ['  ' + line if line.strip() else line for line in new_lines]
@@ -238,6 +243,12 @@ def process_file_content(src_path, dest_path, env_vars):
         else:
             new_lines.append(line)
     
+    # Remove trailing blank lines and ensure final newline
+    while new_lines and new_lines[-1].strip() == '':
+        new_lines.pop()
+    if new_lines and not new_lines[-1].endswith('\n'):
+        new_lines[-1] += '\n'
+
     try:
         with open(dest_path, 'w', encoding='utf-8') as f:
             f.writelines(new_lines)
