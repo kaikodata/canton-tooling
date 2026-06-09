@@ -392,9 +392,13 @@ def process_directory(src_dir, dest_dir, env_file, debug=False, alias_prefix=Fal
                             else:
                                 logging.error(f"SOPS encryption failed for {dest_file}: {sops_result.stderr.strip()}")
                                 print(f"[ERROR] SOPS encryption failed for {dest_file}: {sops_result.stderr.strip()}")
-                        # Add secrets-clear.yaml to .gitignore
-                        relative_file_path = os.path.relpath(dest_file, dest_dir)
-                        symlink_targets.add(relative_file_path)
+                        # The SOPS-encrypted secrets.yaml is the committed artifact; the rendered
+                        # plaintext secrets-clear.yaml is a throwaway intermediate. Purge it so no
+                        # plaintext secret ever lingers on disk (it is re-rendered on the next run).
+                        # It is therefore NOT added to .gitignore — there is nothing to ignore.
+                        if os.path.isfile(dest_file):
+                            os.remove(dest_file)
+                            logging.debug(f"Removed plaintext intermediate: {dest_file}")
                     elif file in ('Chart.yaml', 'values.yaml'):
                         logging.debug(f"Processing {file} at {src_file} without alias prefix")
                         process_yaml_content(src_file, dest_path=dest_file, env_vars=env_vars)
