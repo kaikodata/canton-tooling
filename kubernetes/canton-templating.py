@@ -15,6 +15,18 @@ def setup_logging(debug):
     level = logging.DEBUG if debug else logging.INFO
     logging.basicConfig(level=level, format='%(asctime)s - %(levelname)s:%(message)s')
 
+def fatal(message):
+    """Abort the whole run with a non-zero exit code.
+
+    Used for failures that would otherwise let templating continue against an
+    incomplete substitution map. Continuing is worse than stopping: a missing
+    value leaves the template placeholder in place, and the generated file then
+    silently overwrites real configuration with a template default.
+    """
+    logging.error(message)
+    print(f"FATAL: {message}", file=sys.stderr)
+    sys.exit(1)
+
 def load_json_file(file_path, decrypt=False):
     """Load a JSON file, optionally decrypting with SOPS in memory."""
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -26,14 +38,10 @@ def load_json_file(file_path, decrypt=False):
             capture_output=True, text=True
         )
         if result.returncode != 0:
-            logging.error(f"sops decryption failed for {file_path}: {result.stderr.strip()}")
-            print(f"ERROR: sops decryption failed for {file_path}: {result.stderr.strip()}")
-            return {}
+            fatal(f"sops decryption failed for {file_path}: {result.stderr.strip()}")
         raw = json.loads(result.stdout)
     if not isinstance(raw, dict):
-        logging.error(f"JSON file {file_path} must contain a flat object")
-        print(f"ERROR: JSON file {file_path} must contain a flat object")
-        return {}
+        fatal(f"JSON file {file_path} must contain a flat object")
     return {str(k): str(v) for k, v in raw.items()}
 
 def load_env_vars(env_file_path):
@@ -285,8 +293,8 @@ def process_directory(src_dir, dest_dir, env_file, debug=False, alias_prefix=Fal
     setup_logging(debug)
     env_vars = load_env_vars(env_file)
     if not env_vars:
-        logging.error(f"No environment variables loaded; substitutions will be skipped")
-        print(f"ERROR: No environment variables loaded; substitutions will be skipped")
+        fatal(f"No environment variables loaded from {env_file}; refusing to render "
+              f"templates with an empty substitution map")
     
     # Normalize process_ext to list of extensions with leading dot
     process_extensions = []
@@ -390,8 +398,13 @@ def process_directory(src_dir, dest_dir, env_file, debug=False, alias_prefix=Fal
                                 logging.info(f"SOPS encrypted {dest_file} -> {secrets_encrypted}")
                                 print(f"[INFO] SOPS encrypted {os.path.relpath(secrets_encrypted)}")
                             else:
-                                logging.error(f"SOPS encryption failed for {dest_file}: {sops_result.stderr.strip()}")
-                                print(f"[ERROR] SOPS encryption failed for {dest_file}: {sops_result.stderr.strip()}")
+                                # Purge the rendered plaintext before aborting so a failed run
+                                # never leaves a cleartext secret on disk, then fail loudly:
+                                # secrets.yaml is now stale relative to its template.
+                                err = sops_result.stderr.strip()
+                                if os.path.isfile(dest_file):
+                                    os.remove(dest_file)
+                                fatal(f"SOPS encryption failed for {dest_file}: {err}")
                         # The SOPS-encrypted secrets.yaml is the committed artifact; the rendered
                         # plaintext secrets-clear.yaml is a throwaway intermediate. Purge it so no
                         # plaintext secret ever lingers on disk (it is re-rendered on the next run).
