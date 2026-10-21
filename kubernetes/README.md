@@ -169,7 +169,7 @@ Test an invalid flag:
 - **No `.gitignore` Created**: Ensure `dest_dir` is writable. If using `--use-gitignore`, verify a Git repository exists (contains a `.git` directory).
 - **Nested Symlinks**: Should not occur due to symlink cleanup. If seen, share `find canton-sv-devnet1/ -type l | xargs ls -ltr` output.
 - **Substitution Issues**: Check the environment file for correct key-value pairs. Use `--debug` to log substitutions.
-- **SOPS Decryption Fails**: Ensure `sops` is installed and you have access to the decryption key (e.g., AWS KMS, GCP KMS, or age key). Check the error message in the output.
+- **SOPS Decryption Fails**: Ensure `sops` is installed and you have access to the decryption key (e.g., AWS KMS, GCP KMS, or age key). Check the error message in the output. This includes decrypting an existing `secrets.yaml` to check whether it changed: the run aborts rather than re-encrypting an unchanged secret, so a transient KMS error never shows up as a secret change in the diff. Re-run once the key is reachable.
 - **JSON Parse Errors**: Ensure JSON files contain a valid flat `{"KEY": "VALUE"}` object. Nested objects are not supported.
 - **Invalid Parameters**: Run with `--help` to see available arguments.
 
