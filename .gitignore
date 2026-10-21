@@ -1,1 +1,5 @@
 .idea/
+
+# Python bytecode, rewritten on every run
+__pycache__/
+*.py[cod]
