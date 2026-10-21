@@ -374,19 +374,27 @@ def process_directory(src_dir, dest_dir, env_file, debug=False, alias_prefix=Fal
                                 ['sops', '-d', secrets_encrypted],
                                 capture_output=True, text=True
                             )
-                            if decrypt_result.returncode == 0:
-                                with open(dest_file, 'r') as f:
-                                    new_content = f.read()
-                                # Compare by parsing YAML to ignore formatting differences
-                                try:
-                                    existing_data = yaml.safe_load(decrypt_result.stdout)
-                                    new_data = yaml.safe_load(new_content)
-                                    if existing_data == new_data:
-                                        need_encrypt = False
-                                        logging.debug(f"secrets unchanged, skipping re-encryption: {secrets_encrypted}")
-                                        print(f"[INFO] secrets unchanged: {os.path.relpath(secrets_encrypted)}")
-                                except yaml.YAMLError as e:
-                                    logging.warning(f"YAML parse error during comparison, will re-encrypt: {e}")
+                            if decrypt_result.returncode != 0:
+                                # Without the existing plaintext there is nothing to compare
+                                # against, and re-encrypting anyway rewrites the ciphertext of
+                                # an unchanged secret: a diff that looks like a secret change.
+                                # Purge the rendered plaintext, then fail like the other sops errors.
+                                err = decrypt_result.stderr.strip()
+                                if os.path.isfile(dest_file):
+                                    os.remove(dest_file)
+                                fatal(f"SOPS decryption failed for {secrets_encrypted}: {err}")
+                            with open(dest_file, 'r') as f:
+                                new_content = f.read()
+                            # Compare by parsing YAML to ignore formatting differences
+                            try:
+                                existing_data = yaml.safe_load(decrypt_result.stdout)
+                                new_data = yaml.safe_load(new_content)
+                                if existing_data == new_data:
+                                    need_encrypt = False
+                                    logging.debug(f"secrets unchanged, skipping re-encryption: {secrets_encrypted}")
+                                    print(f"[INFO] secrets unchanged: {os.path.relpath(secrets_encrypted)}")
+                            except yaml.YAMLError as e:
+                                logging.warning(f"YAML parse error during comparison, will re-encrypt: {e}")
                         if need_encrypt:
                             sops_result = subprocess.run(
                                 ['sops', '-e', dest_file],
